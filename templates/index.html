@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Face Recognition Template</title>
+    <style>
+        body {
+            font-family: -apple-system, Segoe UI, Roboto, sans-serif;
+            background: #111;
+            color: #eee;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px;
+        }
+        h1 { font-weight: 600; }
+        #video-feed {
+            border-radius: 8px;
+            border: 2px solid #333;
+            max-width: 90vw;
+        }
+        .panel {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        input {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background: #1c1c1c;
+            color: #eee;
+        }
+        button {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            background: #2d7dfb;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover { background: #1e63d9; }
+        #status { margin-top: 12px; min-height: 20px; }
+        .legend {
+            margin-top: 10px;
+            font-size: 0.85em;
+            color: #999;
+        }
+        .swatch {
+            display: inline-block;
+            width: 10px; height: 10px;
+            border-radius: 2px;
+            margin-right: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Live Face Recognition</h1>
+
+    <img id="video-feed" src="/video_feed" alt="Live camera feed">
+
+    <div class="legend">
+        <span class="swatch" style="background:#00c800"></span> known face
+        &nbsp;&nbsp;
+        <span class="swatch" style="background:#dc0000"></span> unknown face
+    </div>
+
+    <div class="panel">
+        <input id="name-input" type="text" placeholder="Enter a name">
+        <button onclick="registerFace()">Register current face</button>
+    </div>
+
+    <div id="status"></div>
+
+    <script>
+        async function registerFace() {
+            const nameInput = document.getElementById("name-input");
+            const status = document.getElementById("status");
+            const name = nameInput.value.trim();
+
+            if (!name) {
+                status.textContent = "Please type a name first.";
+                status.style.color = "#e88";
+                return;
+            }
+
+            status.textContent = "Registering...";
+            status.style.color = "#ccc";
+
+            const formData = new FormData();
+            formData.append("name", name);
+
+            try {
+                const response = await fetch("/register", {
+                    method: "POST",
+                    body: formData,
+                });
+                const data = await response.json();
+                status.textContent = data.message;
+                status.style.color = data.success ? "#8e8" : "#e88";
+                if (data.success) nameInput.value = "";
+            } catch (err) {
+                status.textContent = "Request failed: " + err;
+                status.style.color = "#e88";
+            }
+        }
+    </script>
+</body>
+</html>
